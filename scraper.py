@@ -1,6 +1,7 @@
-import os, requests
+import os, requests, re
 from dotenv import load_dotenv
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
@@ -36,7 +37,39 @@ def get_api(API_KEY, BASE_URL, date = None, target = ["USD", "JPY(100)", "EUR"])
 
     return filtered
 
+def get_news():
+    
+    url = "https://kita.net/cmmrcInfo/ehgtNews/ehgtNewsList.do"
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
 
+    res = requests.get(url, headers=headers)
+    
+    soup = BeautifulSoup(res.text, "html.parser")
+    news = soup.select_one(".board-list li") # 최상단 뉴스 하나만 스크래핑
+    
+    # title
+    title = news.select_one(".subject a").get("title")
+    
+    # date
+    date = news.select_one(".info .date").get_text(strip=True)
+    
+    # link
+    onclick = news.select_one(".subject a").get("onclick")
+    match = re.search(r"goDetailPage\('(\d+)',\s*'(\d+)'\)", onclick)
+    classification, no = match.groups() # match.group()은 1개
+    link = f"https://kita.net/cmmrcInfo/ehgtNews/ehgtNewsDetail.do?classification={classification}&no={no}"
+    
+    news_info = {
+        "title" : title,
+        "link" : link,
+        "date" : date, 
+    }
+    
+    return news_info
 if __name__ == "__main__":
     data = get_api(API_KEY, BASE_URL)
     print(data)
+    print(get_news())

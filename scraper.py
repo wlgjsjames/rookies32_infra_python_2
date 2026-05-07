@@ -1,14 +1,14 @@
 import os, requests, re
 from dotenv import load_dotenv
-from datetime import datetime
 from bs4 import BeautifulSoup
+# from datetime import datetime
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 BASE_URL = os.getenv("BASE_URL")
 
-date = datetime.now()
-today = date.strftime("%Y%m%d")
+# date = datetime.now()
+# today = date.strftime("%Y%m%d")
 
 if not API_KEY or not BASE_URL:
     raise ValueError(".env 값 없음")
@@ -16,7 +16,7 @@ if not API_KEY or not BASE_URL:
 target = ["USD", "JPY(100)", "EUR"]
 
 def get_api(API_KEY, BASE_URL, date = None, target = ["USD", "JPY(100)", "EUR"]):
-    
+    """api통신으로 받은 데이터를 필터링해서 [{code, cur_unit, deal_bas_r}]로 반환"""
     params = {
         "authkey": API_KEY,
         "data": "AP01" # 환율
@@ -38,7 +38,7 @@ def get_api(API_KEY, BASE_URL, date = None, target = ["USD", "JPY(100)", "EUR"])
     return filtered
 
 def get_news():
-    
+    """news_info를 반환 {title, link, date}"""
     url = "https://kita.net/cmmrcInfo/ehgtNews/ehgtNewsList.do"
     
     headers = {

@@ -12,25 +12,31 @@ today = date.strftime("%Y%m%d")
 if not API_KEY or not BASE_URL:
     raise ValueError(".env 값 없음")
 
-params = {
-    "authkey": API_KEY,
-    "searchdate": today, # default (현재일)
-    "data": "AP01" # 환율
-}
-
 target = ["USD", "JPY(100)", "EUR"]
 
-try:
-    response = requests.get(f"{BASE_URL}", params=params, timeout=5)
-    response.raise_for_status()
+def get_api(API_KEY, BASE_URL, date = None, target = ["USD", "JPY(100)", "EUR"]):
     
-    data = response.json()
+    params = {
+        "authkey": API_KEY,
+        "data": "AP01" # 환율
+    }
+    # date 기본값은 today이다. ex) 20260507 형태로 입력해야함.
+    if date is not None:
+        params["searchdate"] = date
+        
+    try:
+        response = requests.get(f"{BASE_URL}", params=params, timeout=5)
+        response.raise_for_status()
+        
+        data = response.json()
 
-    filtered = [{"code": x.get("cur_nm"), "cur_unit": x.get("cur_unit"), "deal_bas_r": x.get("deal_bas_r")}for x in data if x.get("cur_unit") in target]
-    print(filtered)
-except Exception as e:
-    print(f"에러 발생: {e}")
+        filtered = [{"code": x.get("cur_nm"), "cur_unit": x.get("cur_unit"), "deal_bas_r": x.get("deal_bas_r")}for x in data if x.get("cur_unit") in target]
+    except Exception as e:
+        print(f"에러 발생: {e}")
+
+    return filtered
 
 
-
-
+if __name__ == "__main__":
+    data = get_api(API_KEY, BASE_URL)
+    print(data)

@@ -12,7 +12,7 @@ from openpyxl import load_workbook
 load_dotenv()
 
 # 메일 보내기 함수
-def send_mail():
+def send_mail(file_path):
     # smtp 접속정보 load
     user_email = os.getenv("EMAIL_USER")
     user_password = os.getenv("EMAIL_PASS")
@@ -21,7 +21,6 @@ def send_mail():
 
     # 엑셀 파일첨부
     msg = MIMEMultipart()
-    file_path = "project_2j/test.xlsx"
     if not os.path.exists(file_path):
         print("메일에 첨부하려는 엑셀 파일이 존재하지 않습니다.")
         return
@@ -80,6 +79,4 @@ def send_mail():
 
 # 함수 실행
 if __name__ =="__main__":
-    send_mail()
-
-    
+    send_mail("path/to/your/report.xlsx")

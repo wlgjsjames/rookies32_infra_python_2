@@ -4,6 +4,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from datetime import datetime, time
 from scraper import get_api, get_news
+from pymongo import MongoClient
 
 load_dotenv()
 # DB 연결
@@ -37,38 +38,39 @@ def Create_db():
         print(f"환율 데이터 {len(rate_data)}건에 수집시간 포함하여 저장 완료!")
 
     # 뉴스 데이터 불러오기 및 article_col에 저장
-    if news_data and len(news_data) > 0:
+    if news_data:
         article_col.insert_many([news_data])
         print(f"뉴스 데이터 {len(news_data)}건 저장 완료!")
-    else:
-        print("저장할 뉴스 데이터가 없습니다. (수집 결과 0건)")
 
 # Read: 데이터 찾아오기
-def get_data_by_date():
-    # 1. 오늘의 시작 시간 (00:00:00)과 끝 시간 (23:59:59) 객체 만들기
-    today = datetime.now()
-    start_of_day = datetime.combine(today, time.min) # 2026-05-07 00:00:00
-    end_of_day = datetime.combine(today, time.max)   # 2026-05-07 23:59:59
-
-    # 2. 범위 쿼리 날리기 ($gte: 크거나 같다, $lte: 작거나 같다)
-    query = {
-        "collected_at": {
-            "$gte": start_of_day,
-            "$lte": end_of_day
-        }
-    }
+def get_data_by_date(target_date):
     
-    # 3. 결과 반환
-    return list(rate_col.find(query))
+    rate_cursor = rate_col.find({"date": target_date})
+    rate_data = list(rate_cursor)
+
+    article_cursor = article_col.find({"date": target_date})
+    article_data = list(article_cursor)
+    
+    return rate_data, article_data
 
 if __name__ == "__main__":
-    # data = Create_db()
-        
-    data = get_data_by_date()
+    # Create_db()  # 저장 실행
     
-    if not data:
-        print("조회된 데이터가 없습니다. DB의 필드명을 확인해보세요.")
+    today_date = datetime.now().strftime("%Y.%m.%d")
+    
+    # [수정 포인트] 리스트 두 개를 따로따로 받습니다.
+    rates, articles = get_data_by_date(today_date)
+    
+    # 1. 환율 정보 출력
+    if not rates:
+        print("오늘 수집된 환율 데이터가 없습니다.")
     else:
-        print(f"오늘 수집된 데이터 {len(data)}건을 찾았습니다!")
-        for item in data:  
+        print(f"오늘 수집된 환율 {len(rates)}건을 찾았습니다!")
+        for item in rates:  # 이제 item은 리스트 안의 '딕셔너리'입니다.
             print(f"[{item.get('cur_unit')}] 환율: {item.get('deal_bas_r')}")
+
+    # 2. 뉴스 정보 출력 (선택 사항)
+    if articles:
+        print(f"\n오늘 수집된 뉴스 {len(articles)}건:")
+        for news in articles:
+            print(f"- {news.get('title')}")

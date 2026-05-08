@@ -69,19 +69,23 @@ def download():
 
 @app.route('/email', methods=['GET', 'POST'])
 def send_email():
-    """3. 이메일 전송 화면"""
     if request.method == 'POST':
         email_addr = request.form.get('email')
         content = request.form.get('content')
-        file_path = "exchange_report.xlsx" # 미리 생성된 파일 혹은 즉시 생성
+        file_path = "exchange_report.xlsx" 
         
         try:
-            mailer.send_mail_custom(email_addr, content, file_path) # mailer 함수 수정 필요
-            flash("이메일 전송에 성공했습니다!")
+            # 메일러 함수 호출
+            mailer.send_mail_custom(email_addr, content, file_path)
+            # [수정] 성공 메시지 저장
+            flash("📧 이메일 전송이 성공적으로 완료되었습니다!")
+            # [수정] 메인 화면으로 리다이렉트
+            return redirect(url_for('index'))
+            
         except Exception as e:
-            flash(f"전송 실패: {e}")
-        return redirect(url_for('index'))
-        
+            flash(f"❌ 전송 실패: {str(e)}")
+            return redirect(url_for('index')) # 실패해도 일단 메인으로
+            
     return render_template('email.html')
 
 if __name__ == "__main__":

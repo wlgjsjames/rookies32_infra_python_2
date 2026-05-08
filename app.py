@@ -72,19 +72,25 @@ def send_email():
     if request.method == 'POST':
         email_addr = request.form.get('email')
         content = request.form.get('content')
+        
+        # 파일 경로 설정 (csv_gen 등을 통해 생성된 파일명)
+        # 예시: 오늘 날짜가 포함된 파일명을 동적으로 가져오거나 고정 경로 사용
         file_path = "exchange_report.xlsx" 
         
         try:
-            # 메일러 함수 호출
-            mailer.send_mail_custom(email_addr, content, file_path)
-            # [수정] 성공 메시지 저장
-            flash("📧 이메일 전송이 성공적으로 완료되었습니다!")
-            # [수정] 메인 화면으로 리다이렉트
+            # 수정된 mailer.send_mail 호출
+            success = mailer.send_mail(content, file_path, to_email=email_addr)
+            
+            if success:
+                flash("📧 이메일과 엑셀 리포트 전송이 완료되었습니다!")
+            else:
+                flash("❌ 파일이 없거나 발송에 실패했습니다.")
+                
             return redirect(url_for('index'))
             
         except Exception as e:
-            flash(f"❌ 전송 실패: {str(e)}")
-            return redirect(url_for('index')) # 실패해도 일단 메인으로
+            flash(f"❌ 오류 발생: {str(e)}")
+            return redirect(url_for('index'))
             
     return render_template('email.html')
 

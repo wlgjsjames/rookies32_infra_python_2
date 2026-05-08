@@ -79,7 +79,7 @@ def send_email():
         
         try:
             # 수정된 mailer.send_mail 호출
-            success = mailer.send_mail(content, file_path, to_email=email_addr)
+            success = mailer.send_mail(file_path, content, to_email=email_addr)
             
             if success:
                 flash("📧 이메일과 엑셀 리포트 전송이 완료되었습니다!")

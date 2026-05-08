@@ -8,7 +8,7 @@ from email.mime.base import MIMEBase
 
 load_dotenv()
 
-def send_mail(content, file_path, to_email=None):
+def send_mail(file_path, content="", to_email=None):
     """
     app.py 또는 main.py에서 호출하여 메일을 발송합니다.
     :param content: 메일 본문에 들어갈 텍스트 내용

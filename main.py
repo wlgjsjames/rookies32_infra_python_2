@@ -88,7 +88,7 @@ schedule.every().day.at("00:00").do(job)
 
 if __name__ == "__main__":
   # 테스트 시 주석 풀기
-  #job()
+  job()
   #time.sleep(5)
   #job()
   
